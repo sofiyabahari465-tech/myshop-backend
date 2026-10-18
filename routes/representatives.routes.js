@@ -119,6 +119,29 @@ function publicRepresentative(representative) {
     ...safeRepresentative
   } = representative;
 
+  // محاسبه تعداد کالاهای دارای موجودی از انبار واقعی
+  const warehouses = readRepresentativeWarehouses();
+  const warehouse = warehouses.find((w) =>
+    sameValue(w.representativeId, representative.id),
+  );
+
+  const items = Array.isArray(warehouse?.items)
+    ? warehouse.items
+    : [];
+
+  const stockedItems = items.filter(
+    (item) => Number(item.quantity) > 0,
+  );
+
+  safeRepresentative.storeItemsCount = stockedItems.length;
+  safeRepresentative.storeItemsTotalValue = stockedItems.reduce(
+    (sum, item) =>
+      sum +
+      Math.max(0, Number(item.quantity || 0)) *
+        Math.max(0, Number(item.unitPrice || 0)),
+    0,
+  );
+
   return safeRepresentative;
 }
 
