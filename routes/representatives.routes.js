@@ -122,7 +122,7 @@ function publicRepresentative(representative) {
   // محاسبه تعداد کالاهای دارای موجودی از انبار واقعی
   const warehouses = readRepresentativeWarehouses();
   const warehouse = warehouses.find((w) =>
-    sameValue(w.representativeId, representative.id),
+    String(w.representativeId || '') === String(representative.id || ''),
   );
 
   const items = Array.isArray(warehouse?.items)
