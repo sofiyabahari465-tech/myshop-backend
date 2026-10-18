@@ -152,6 +152,9 @@ const flush = (name) => {
         console.log(
           `💾 ${name} در MongoDB ذخیره شد (${cache[name].length} رکورد).`,
         );
+
+        // reload cache from MongoDB to ensure sync
+        cache[name] = await Model.find({}).lean();
       },
     ).catch((error) => {
       console.error(
