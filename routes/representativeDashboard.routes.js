@@ -445,10 +445,10 @@ router.get(
         );
 
       // محاسبه آمار فروش برای نماینده (خواندن مستقیم از MongoDB)
-      const SalesReportModel = models.SalesReport;
-      const repSales = await SalesReportModel.find({
+      const db = mongoose.connection.db;
+      const repSales = await db.collection('salesreports').find({
         representativeId: String(representative.id || ''),
-      }).lean();
+      }).toArray();
 
       // تعداد اعلام فروش
       const salesAnnouncementCount = repSales.length;
