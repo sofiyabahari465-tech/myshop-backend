@@ -1490,7 +1490,7 @@ router.get(
   '/my',
   authenticateToken,
   requireRepresentative,
-  async (req, res) => {
+  (req, res) => {
     try {
       const representativeId = String(
         req.user.representativeId ||
@@ -1500,8 +1500,7 @@ router.get(
 
 
       // خواندن مستقیم از MongoDB (بدون cache)
-      const db = mongoose.connection.db;
-      const allReports = await db.collection('salesreports').find({}).toArray();
+      const allReports = readSalesReports();
       const reports = allReports
         .filter((report) => {
           return sameValue(

@@ -56,6 +56,22 @@ for (const name of Object.keys(
 
 const ensureDataFiles = () => true;
 
+// Reload cache from MongoDB (sync version using populate)
+const reloadCache = (name) => {
+  try {
+    const Model = models[COLLECTION_MAP[name]];
+    if (Model) {
+      // Use Model.find().lean() which is sync in Mongoose
+      const data = Model.find({}).lean();
+      if (data && data.length >= 0) {
+        cache[name] = data;
+      }
+    }
+  } catch (e) {
+    console.error('خطا در reload cache:', e.message);
+  }
+};
+
 
 
 const getFilePath = (name) => {
@@ -105,9 +121,12 @@ const readJson = (name) => {
     );
   }
 
+  // اگه cache خالی باشه، از MongoDB بخون
+  if (!cache[name] || cache[name].length === 0) {
+    reloadCache(name);
+  }
 
-
-  return cache[name];
+  return cache[name] || [];
 };
 
 
@@ -340,6 +359,7 @@ const writeWarranties = (data) =>
 
 module.exports = {
   DATA_DIR,
+  reloadCache,
   COLLECTION_MAP,
   cache,
   ensureDataFiles,
