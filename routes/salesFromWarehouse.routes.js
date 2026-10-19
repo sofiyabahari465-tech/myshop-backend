@@ -3,6 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 
+const {
+  readRepresentatives: readRepresentativesFromMongo,
+  readSalesReports: readSalesReportsFromMongo,
+  writeSalesReports: writeSalesReportsToMongo,
+} = require('../helpers/jsonStorage');
 
 const router = express.Router();
 
@@ -128,6 +133,14 @@ const writeJsonFile = (filePath, data) => {
 
 
 const readRepresentatives = () => {
+  try {
+    const reps = readRepresentativesFromMongo();
+    if (reps && reps.length > 0) {
+      return reps;
+    }
+  } catch (e) {
+    console.error('خطا در خواندن نمایندگان از MongoDB:', e.message);
+  }
   return readJsonFile(REPRESENTATIVES_FILE, []);
 };
 
@@ -157,11 +170,24 @@ const writeRepresentativeWarehouses = (warehouses) => {
 
 
 const readSalesReports = () => {
+  try {
+    const reports = readSalesReportsFromMongo();
+    if (reports && reports.length > 0) {
+      return reports;
+    }
+  } catch (e) {
+    console.error('خطا در خواندن گزارش‌های فروش از MongoDB:', e.message);
+  }
   return readJsonFile(SALES_REPORTS_FILE, []);
 };
 
 
 const writeSalesReports = (reports) => {
+  try {
+    writeSalesReportsToMongo(reports);
+  } catch (e) {
+    console.error('خطا در ذخیره گزارش‌های فروش در MongoDB:', e.message);
+  }
   return writeJsonFile(SALES_REPORTS_FILE, reports);
 };
 
