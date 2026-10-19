@@ -359,7 +359,6 @@ const writeWarranties = (data) =>
 
 module.exports = {
   DATA_DIR,
-  reloadCache,
   COLLECTION_MAP,
   cache,
   ensureDataFiles,

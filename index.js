@@ -380,6 +380,15 @@ app.use(
 
 
 
+app.get('/api/reload-cache', async (_req, res) => {
+  try {
+    await loadAllData();
+    return res.json({ success: true, message: 'Cache reloaded from MongoDB' });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 app.get('/api/health', (_req, res) => {
   return res.status(200).json({
     success: true,
