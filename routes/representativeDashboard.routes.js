@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 const {
   readRepresentatives,
@@ -9,6 +10,8 @@ const {
   readShipments,
   readSalesReports,
 } = require('../helpers/jsonStorage');
+
+const models = require('../models');
 
 const {
   normalizeValue,
@@ -442,8 +445,7 @@ router.get(
         );
 
       // محاسبه آمار فروش برای نماینده (خواندن مستقیم از MongoDB)
-      const mongoose = require('mongoose');
-      const SalesReportModel = mongoose.model('SalesReport');
+      const SalesReportModel = models.SalesReport;
       const repSales = await SalesReportModel.find({
         representativeId: String(representative.id || ''),
       }).lean();
