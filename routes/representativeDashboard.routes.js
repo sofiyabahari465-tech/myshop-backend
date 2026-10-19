@@ -7,6 +7,7 @@ const {
   readRepresentativeNotes,
   writeRepresentativeNotes,
   readShipments,
+  readSalesReports,
 } = require('../helpers/jsonStorage');
 
 const {
@@ -440,22 +441,51 @@ router.get(
           representative,
         );
 
+      // محاسبه آمار فروش برای نماینده
+      const allSales = readSalesReports();
+      const repSales = allSales.filter(
+        (s) => String(s.representativeId || '') === String(representative.id || ''),
+      );
+
+      // تعداد اعلام فروش
+      const salesAnnouncementCount = repSales.length;
+
+      // فروش ۱۰ روز گذشته
+      const tenDaysAgo = new Date();
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+      const last10DaysSales = repSales
+        .filter((s) => {
+          const date = new Date(s.createdAt || 0);
+          return date >= tenDaysAgo;
+        })
+        .reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+
+      // فروش ماهانه
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const averageSales = repSales
+        .filter((s) => {
+          const date = new Date(s.createdAt || 0);
+          return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        })
+        .reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+
       return res.status(200).json({
         success: true,
         data: {
           representative: {
             ...safeRepresentative,
-
-            storeItemsCount:
-              warehouse.summary.storeItemsCount,
-
-            storeItemsTotalValue:
-              warehouse.summary
-                .storeItemsTotalValue,
+            storeItemsCount: warehouse.summary.storeItemsCount,
+            storeItemsTotalValue: warehouse.summary.storeItemsTotalValue,
+            salesAnnouncementCount,
+            last10DaysSales,
+            averageSales,
+            orders: salesAnnouncementCount,
           },
-
           shipments,
           warehouse,
+          salesReports: repSales,
         },
       });
     } catch (error) {
