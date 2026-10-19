@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -1489,7 +1490,7 @@ router.get(
   '/my',
   authenticateToken,
   requireRepresentative,
-  (req, res) => {
+  async (req, res) => {
     try {
       const representativeId = String(
         req.user.representativeId ||
@@ -1498,7 +1499,10 @@ router.get(
       ).trim();
 
 
-      const reports = readSalesReports()
+      // خواندن مستقیم از MongoDB (بدون cache)
+      const db = mongoose.connection.db;
+      const allReports = await db.collection('salesreports').find({}).toArray();
+      const reports = allReports
         .filter((report) => {
           return sameValue(
             report.representativeId,
