@@ -385,7 +385,7 @@ router.get(
   '/dashboard',
   authenticateToken,
   requireRepresentative,
-  (req, res) => {
+  async (req, res) => {
     try {
       const representatives =
         readRepresentatives();
@@ -441,11 +441,12 @@ router.get(
           representative,
         );
 
-      // محاسبه آمار فروش برای نماینده
-      const allSales = readSalesReports();
-      const repSales = allSales.filter(
-        (s) => String(s.representativeId || '') === String(representative.id || ''),
-      );
+      // محاسبه آمار فروش برای نماینده (خواندن مستقیم از MongoDB)
+      const mongoose = require('mongoose');
+      const SalesReportModel = mongoose.model('SalesReport');
+      const repSales = await SalesReportModel.find({
+        representativeId: String(representative.id || ''),
+      }).lean();
 
       // تعداد اعلام فروش
       const salesAnnouncementCount = repSales.length;
@@ -1010,4 +1011,3 @@ router.delete(
   },
 );
 
-module.exports = router;
