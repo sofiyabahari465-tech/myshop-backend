@@ -47,8 +47,10 @@ const allowedExtensions = [
   'rar',
 ];
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB
-const MAX_FILES_PER_UPLOAD = 10;
+// محدودیتی روی تعداد فایل‌ها و حجم آن‌ها اعمال نمی‌شود.
+// کاربر می‌تواند هر تعداد عکس یا فایل که خواست آپلود کند.
+const MAX_FILE_SIZE = Number.MAX_SAFE_INTEGER; // بدون محدودیت حجم
+const MAX_FILES_PER_UPLOAD = Number.MAX_SAFE_INTEGER; // بدون محدودیت تعداد
 
 function getFileIcon(fileName) {
   const extension = path.extname(
@@ -300,10 +302,7 @@ const uploadStorage = multer.diskStorage({
 
 const upload = multer({
   storage: uploadStorage,
-  limits: {
-    fileSize: MAX_FILE_SIZE,
-    files: MAX_FILES_PER_UPLOAD,
-  },
+  // محدودیت حجم و تعداد فایل حذف شد - آپلود بدون محدودیت
   fileFilter: (req, file, cb) => {
     // نرمال‌سازی نام فایل برای بررسی extension
     const originalName = Buffer.isBuffer(
@@ -440,7 +439,7 @@ router.post(
   '/:id/files',
   authenticateToken,
   requireAdmin,
-  upload.array('files', MAX_FILES_PER_UPLOAD),
+  upload.array('files'),
   (req, res) => {
     try {
       const representativeId = String(
